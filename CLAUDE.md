@@ -90,3 +90,13 @@ src/
 - 현재 테스트 프레임워크 구성 없음
 - 코드 품질을 위한 ESLint + Prettier 구성
 - Vite 개발 서버는 3000번 포트에서 자동으로 브라우저 열기 설정 (3001번+ 대체)
+
+## 완료 상태 (2025-07-29)
+프로젝트가 성공적으로 배포되어 운영 중입니다:
+- **사이트**: https://moadesign.vercel.app
+- **도메인**: https://moadesign.info (연결 완료)
+- **문의 폼**: 파일 첨부 기능 포함하여 정상 작동
+- **이메일**: hdopen@moacoms.com으로 자동 전송
+- **GitHub**: https://github.com/moacoms/moadesign
+
+상세한 관리 정보는 `PROJECT_DOCUMENTATION.md` 참조
