@@ -58,18 +58,22 @@ const Contact = () => {
     setSubmitStatus(null)
 
     try {
+      // FormData 사용으로 변경 (파일 전송을 위해)
+      const formData = new FormData()
+      formData.append('name', data.name)
+      formData.append('email', data.email)
+      formData.append('phone', data.phone || '')
+      formData.append('subject', data.subject)
+      formData.append('message', data.message)
+      
+      // 첨부 파일 추가
+      attachedFiles.forEach((file, index) => {
+        formData.append(`file${index}`, file)
+      })
+
       const response = await fetch('/api/contact', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: data.name,
-          email: data.email,
-          phone: data.phone || '',
-          subject: data.subject,
-          message: data.message,
-        })
+        body: formData
       })
 
       const result = await response.json()

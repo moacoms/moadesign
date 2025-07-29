@@ -23,7 +23,8 @@
       "Bash(git push:*)",
       "Bash(vercel)",
       "Bash(vercel:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(mv:*)"
     ],
     "deny": []
   }

@@ -1,12 +1,4 @@
 import nodemailer from 'nodemailer';
-import formidable from 'formidable';
-import fs from 'fs/promises';
-
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -15,6 +7,10 @@ export default async function handler(req, res) {
 
   // 환경 변수 확인
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    console.error('환경 변수 누락:', {
+      EMAIL_USER: process.env.EMAIL_USER ? '설정됨' : '누락',
+      EMAIL_PASS: process.env.EMAIL_PASS ? '설정됨' : '누락'
+    });
     return res.status(500).json({ 
       success: false, 
       message: '서버 설정 오류: 이메일 환경 변수가 설정되지 않았습니다.' 
@@ -22,46 +18,18 @@ export default async function handler(req, res) {
   }
 
   try {
-    // FormData 파싱
-    const form = formidable({
-      maxFileSize: 10 * 1024 * 1024, // 10MB
-      keepExtensions: true,
-    });
+    const { name, email, phone, subject, message } = req.body;
 
-    const [fields, files] = await form.parse(req);
-
-    // 필드 값 추출
-    const name = fields.name?.[0] || '';
-    const email = fields.email?.[0] || '';
-    const phone = fields.phone?.[0] || '';
-    const subject = fields.subject?.[0] || '';
-    const message = fields.message?.[0] || '';
-
-    // Gmail SMTP 설정
+    // Gmail SMTP 설정 (환경 변수 사용)
     const transporter = nodemailer.createTransport({
       host: 'smtp.gmail.com',
       port: 587,
       secure: false,
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        pass: process.env.EMAIL_PASS, // Gmail 앱 비밀번호
       },
     });
-
-    // 첨부파일 준비
-    const attachments = [];
-    const fileKeys = Object.keys(files);
-    
-    for (const key of fileKeys) {
-      const file = files[key][0];
-      if (file) {
-        const content = await fs.readFile(file.filepath);
-        attachments.push({
-          filename: file.originalFilename || 'attachment',
-          content: content,
-        });
-      }
-    }
 
     // 이메일 내용 구성
     const mailOptions = {
@@ -79,19 +47,27 @@ export default async function handler(req, res) {
         <h3>문의 내용:</h3>
         <p style="white-space: pre-wrap;">${message}</p>
         <hr/>
-        <p><strong>첨부 파일:</strong> ${attachments.length}개</p>
-        <hr/>
         <p style="color: #666; font-size: 12px;">
           이 메일은 MOADESIGN 웹사이트 문의 폼에서 자동으로 발송되었습니다.
         </p>
       `,
-      attachments: attachments,
+      text: `
+        새로운 문의가 접수되었습니다
+
+        이름: ${name}
+        이메일: ${email}
+        연락처: ${phone || '미입력'}
+        제목: ${subject}
+
+        문의 내용:
+        ${message}
+      `,
     };
 
     // 이메일 전송
     await transporter.sendMail(mailOptions);
 
-    // 자동 응답 메일 전송
+    // 자동 응답 메일 전송 (선택사항)
     const autoReplyOptions = {
       from: process.env.EMAIL_USER,
       to: email,
@@ -114,25 +90,14 @@ export default async function handler(req, res) {
 
     await transporter.sendMail(autoReplyOptions);
 
-    // 임시 파일 정리
-    for (const key of fileKeys) {
-      const file = files[key][0];
-      if (file) {
-        try {
-          await fs.unlink(file.filepath);
-        } catch (error) {
-          console.error('임시 파일 삭제 실패:', error);
-        }
-      }
-    }
-
     return res.status(200).json({ success: true, message: '문의가 성공적으로 전송되었습니다.' });
   } catch (error) {
     console.error('이메일 전송 오류:', error);
+    const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류';
     return res.status(500).json({ 
       success: false, 
       message: '전송 중 오류가 발생했습니다.',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: process.env.NODE_ENV === 'development' ? errorMessage : undefined
     });
   }
 }
