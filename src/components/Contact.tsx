@@ -58,24 +58,18 @@ const Contact = () => {
     setSubmitStatus(null)
 
     try {
-      const formData = new FormData()
-      formData.append('name', data.name)
-      formData.append('email', data.email)
-      formData.append('phone', data.phone || '')
-      formData.append('subject', data.subject)
-      formData.append('message', data.message)
-      
-      // 첨부 파일 추가
-      attachedFiles.forEach(file => {
-        formData.append('files', file)
-      })
-
-      // 개발 환경에서는 백엔드 없이 시뮬레이션
-      // TODO: 실제 백엔드 API 연동 시 주석 해제
-      /*
       const response = await fetch('/api/contact', {
         method: 'POST',
-        body: formData
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: data.name,
+          email: data.email,
+          phone: data.phone || '',
+          subject: data.subject,
+          message: data.message,
+        })
       })
 
       const result = await response.json()
@@ -87,24 +81,6 @@ const Contact = () => {
       } else {
         setSubmitStatus('error')
       }
-      */
-
-      // 임시로 2초 지연 후 성공 응답 시뮬레이션
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      // 콘솔에 전송된 데이터 확인용 로그
-      console.log('문의 내용:', {
-        name: data.name,
-        email: data.email,
-        phone: data.phone,
-        subject: data.subject,
-        message: data.message,
-        files: attachedFiles.map(f => ({ name: f.name, size: f.size }))
-      })
-      
-      setSubmitStatus('success')
-      reset()
-      setAttachedFiles([])
     } catch (error) {
       console.error('Error submitting form:', error)
       setSubmitStatus('error')
