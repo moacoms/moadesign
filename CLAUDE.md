@@ -91,6 +91,23 @@ src/
 - 코드 품질을 위한 ESLint + Prettier 구성
 - Vite 개발 서버는 3000번 포트에서 자동으로 브라우저 열기 설정 (3001번+ 대체)
 
+## Vercel 배포
+
+### 자동 배포
+GitHub 연결 완료 시 `git push`할 때마다 자동 배포됩니다.
+
+### 수동 배포 방법
+1. **Vercel 대시보드**: https://vercel.com/dashboard
+2. **프로젝트 선택**: `moadesign`
+3. **Deployments 탭** → 우측 상단 **"Create Deployment"** 또는 **"Redeploy"** 버튼
+4. **또는**: Overview 페이지 → **점 3개(⋮)** 메뉴 → **"Redeploy"**
+
+### Vercel 설정
+- **Framework Preset**: Vite
+- **Build Command**: `npm run build`
+- **Output Directory**: `dist`
+- **GitHub 저장소**: `moacoms/moadesign`
+
 ## 완료 상태 (2025-07-29)
 프로젝트가 성공적으로 배포되어 운영 중입니다:
 - **사이트**: https://moadesign.vercel.app
